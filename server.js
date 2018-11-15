@@ -29,17 +29,62 @@ router.get('/', function(req, res) {
 });
 
 //on routes that end in /bears
-router.route('/bears').post(function(req, res) {
-	//creating a bear
-	var bear = new Bear(); //creating a new instance of the Bear model
-	bear.name = req.body.name; //set the bears name (comes from request)
-	bear.save(function(err) {
-		//save the bear and check for errors
-		if (err) res.send(err);
+router
+	.route('/bears')
+	.post(function(req, res) {
+		//creating a bear
+		var bear = new Bear(); //creating a new instance of the Bear model
+		bear.name = req.body.name; //set the bears name (comes from request)
+		bear.save(function(err) {
+			//save the bear and check for errors
+			if (err) res.send(err);
 
-		res.json({ message: 'Bear created!' });
+			res.json({ message: 'Bear created!' });
+		});
+	})
+	//get all the bears
+	.get(function(req, res) {
+		Bear.find(function(err, bears) {
+			if (err) res.send(err);
+
+			res.json(bears);
+		});
 	});
-});
+
+//on routes that end in /bears/:bear_id
+router
+	.route('/bears/:bear_id') //get the bear with that id
+	.get(function(req, res) {
+		Bear.findById(req.params.bear_id, function(err, bear) {
+			if (err) res.send(err);
+
+			res.json(bear);
+		});
+	})
+	.put(function(req, res) {
+		Bear.findById(req.params.bear_id, function(err, bear) {
+			if (err) res.send(err);
+
+			bear.name = req.body.name; //update the bears info
+			bear.save(function(err) {
+				if (err) res.send(err);
+
+				res.json({ message: 'Bear updated!' });
+			});
+		});
+	})
+	.delete(function(req, res) {
+		Bear.remove(
+			{
+				_id: req.params.bear_id
+			},
+			function(err, bear) {
+				if (err) res.send(err);
+
+				res.json({ message: 'Successfully deleted' });
+			}
+		);
+	});
 
 //Register our routes
 //all of our routes will be prefixed with /api
